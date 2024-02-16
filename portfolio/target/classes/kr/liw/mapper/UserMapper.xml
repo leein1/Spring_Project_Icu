@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.liw.mapper.UserMapper">
+  	
+  	<resultMap type="kr.liw.domain.UserVO" id="userMap">
+  		<id property="email" column="email"/>
+  		<result property="usernumber" column="usernumber"/>
+  		<result property="email" column="email"/>
+  		<result property="password" column="password"/>
+  		<result property="nickname" column="nickname"/>
+  		<result property="name" column="name"/>
+  		<result property="birth" column="birth"/>
+  		<result property="tel" column="tel"/>
+  		<result property="createdate" column="createdate"/>
+  		<result property="introduce" column="introduce"/>
+  		<result property="instagram" column="instagram"/>
+  		
+  		<collection property="authList" resultMap="authMap"></collection>
+  	</resultMap>
+  	
+  	<resultMap type="kr.liw.domain.AuthVO" id="authMap">
+  		<result property="email" column="email"/>
+  		<result property="auth" column="auth"/>
+  	</resultMap>
+  	
+  	<select id="read" resultMap="userMap">
+  		SELECT
+		    usr.usernumber,
+		    usr.email,
+		    usr.password,
+		    usr.nickname,
+		    usr.name,
+		    usr.birth,
+		    usr.tel,
+		    usr.createdate,
+		    usr.introduce,
+		    usr.instagram,
+            auth
+		FROM
+		    ICU_USER usr
+		LEFT OUTER JOIN
+		    ICU_USER_AUTH auth
+		ON
+		    usr.email = auth.email
+		WHERE
+		    usr.email = #{email}
+  	</select>
+  	
+  	<insert id="insert">
+  		insert into ICU_USER (EMAIL, PASSWORD, NICKNAME, NAME, BIRTH, TEL)
+  		values ( #{email}, #{password}, #{nickname}, #{name}, #{birth}, #{tel})
+  	</insert>
+  	
+  	<insert id="insertAuth">
+  		insert into ICU_USER_AUTH(EMAIL) values (#{email})
+  	</insert>
+  	
+  	<select id="checkEmail" resultType="int">
+  		SELECT COUNT(*) FROM ICU_USER WHERE email = #{email}
+  	</select>
+  	
+  	<select id="checkNickname" resultType="int">
+  		SELECT COUNT(*) FROM ICU_USER WHERE NICKNAME = #{nickname}
+  	</select>
+  	
+  	<update id="update">
+  		update ICU_USER
+  		set 
+  		NAME = #{name},
+  		BIRTH = #{birth},
+  		TEL = #{tel},
+  		INSTAGRAM = #{instagram},
+  		INTRODUCE = #{introduce}
+  		where USERNUMBER = #{usernumber} 
+  	</update>
+  	
+  	
+  	
+  	
+  	
+  	
+  	
+  	<!-- <select id="getList" resultType="kr.liw.domain.UserVO">
+  		select * from ICU_USER where USERNUMBER > 0 order by USERNUMBER
+  	</select>
+  	
+  	<select id="read" resultType="kr.liw.domain.UserVO">
+  		select * from ICU_USER where EMAIL = #{email}
+  	</select>
+  	
+  	<insert id="insert">
+  		insert into ICU_USER (EMAIL, PASSWORD, NICKNAME, NAME, BIRTH, TEL, ADDRESS1, ADDRESS2)
+  		values ( #{email}, #{password}, #{nickname}, #{name}, #{birth}, #{tel}, #{address1, jdbcType=VARCHAR}, #{address2, jdbcType=VARCHAR})
+  	</insert>
+  	
+  	<update id="update">
+  		update ICU_USER
+  		set NICKNAME = #{nickname},
+  		NAME = #{name},
+  		BIRTH = #{birth},
+  		TEL = #{tel},
+  		ADDRESS1 = #{address1},
+  		ADDRESS2 = #{address2}
+  		where USERNUMBER = #{usernumber} 
+  	</update>
+  	
+  	<delete id="delete">
+  		delete from ICU_USER where USERNUMBER = #{usernumber}
+  	</delete>
+  	
+  	<select id="checkEmail" resultType="int">
+  		SELECT COUNT(*) FROM ICU_USER WHERE email = #{email}
+  	</select>
+  	
+  	<select id="checkNickname" resultType="int">
+  		SELECT COUNT(*) FROM ICU_USER WHERE NICKNAME = #{nickname}
+  	</select> -->
+  	
+  	
+  	
+  </mapper>
+  

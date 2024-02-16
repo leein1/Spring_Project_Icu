@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="kr.liw.mapper.PhotoBoardImageMapper">
+  
+  	<insert id="insert">
+  		insert into ICU_PHOTOBOARD_IMAGE (PBNO, ORDERNO, NAME, UUID, PATH, TYPE)
+  		VALUES(#{pbno} , #{orderno , jdbcType=BIGINT}, #{name}, #{uuid}, #{path}, #{type})
+  	</insert>
+  	
+  	<delete id="delete">
+  		delete from ICU_PHOTOBOARD_IMAGE where UUID = #{uuid}
+  	</delete>
+  	
+  	<select id="findByPbno" resultType="kr.liw.domain.PhotoBoardImageVO">
+  		select * from ICU_PHOTOBOARD_IMAGE where PBNO = #{pbno}
+  	</select>
+  	
+  	<delete id="deleteAll">
+  		delete ICU_PHOTOBOARD_IMAGE where PBNO = #{pbno}
+  	</delete>
+  	
+  	<select id="getOldFiles" resultType="kr.liw.domain.PhotoBoardImageVO">
+  		select * from ICU_PHOTOBOARD_IMAGE where PATH = to_char(sysdate -1, 'yyyy/mm/dd')
+  	</select>
+  </mapper>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace = "kr.liw.mapper.ReplyMapper">
+  	<insert id="insert">
+  		insert into ICU_PB_REPLY(RNO, PBNO, REPLY, REPLYER, REPLYER_NICKNAME, PARENT_RNO)
+  		values (ICU_PB_REPLY_SEQ.NEXTVAL, #{pbno},#{reply},#{replyer},#{replyer_nickname},#{parent_rno, jdbcType=BIGINT})
+  	</insert>
+  	
+  	<select id="read" resultType="kr.liw.domain.ReplyVO">
+  		select * from ICU_PB_REPLY where RNO = #{rno}
+  	</select>
+  	
+  	<delete id="delete">
+  		delete from ICU_PB_REPLY where RNO = #{rno}
+  	</delete>
+  	
+  	<update id="update">
+  		update ICU_PB_REPLY set REPLY = #{reply}, UPDATEDATE = sysdate where RNO = #{rno}
+  	</update>
+  	
+  	<!-- <select id="getListWithPaging" resultType="kr.liw.domain.ReplyVO">
+  		<![CDATA[
+  			select RNO, PBNO, REPLY, REPLYER, REPLYDATE, UPDATEDATE
+			from
+			(
+			select /*+index(ICU_PB_REPLY IDX_REPLY)*/
+			rownum rn, PBNO, RNO, REPLY, REPLYER, REPLYDATE, UPDATEDATE
+			from ICU_PB_REPLY
+			where PBNO = #{pbno}
+			and RNO > 0
+			and rownum <= #{cri.pageNum} * #{cri.amount}
+			)where rn > (#{cri.pageNum}-1) * #{cri.amount}
+  		]]>
+  	</select> -->
+  	<select id="getListWithPaging" resultType="kr.liw.domain.ReplyVO">
+  		<![CDATA[
+  			SELECT RN, RNO, PBNO, REPLY, REPLYER, REPLYER_NICKNAME, REPLYDATE, UPDATEDATE, PARENT_RNO, LVL
+			FROM (
+			    SELECT ROWNUM AS RN, a.*
+			    FROM (
+			        SELECT 
+			            RNO,
+			            PBNO,
+			            REPLY,
+			            REPLYER,
+			            REPLYER_NICKNAME,
+			            REPLYDATE,
+			            UPDATEDATE,
+			            PARENT_RNO,
+			            LEVEL AS LVL
+			        FROM 
+			            ICU_PB_REPLY
+			        WHERE 
+			            PBNO = #{pbno} -- PBNO가 24인 레코드만
+			        START WITH 
+			            PARENT_RNO = 0
+			        CONNECT BY PRIOR 
+			            RNO = PARENT_RNO
+			        ORDER SIBLINGS BY
+			           REPLYDATE
+			    ) a
+			)
+			WHERE RN > (#{cri.pageNum}-1) * #{cri.amount} AND RN <= #{cri.pageNum} * #{cri.amount}
+  		]]>
+  	</select>
+  	
+  	<select id="getCountByPbno" resultType="int">
+	  	<![CDATA[
+	  		select count(RNO) from ICU_PB_REPLY where PBNO = #{pbno}
+	  	]]>
+  	</select>
+  	
+  	<select id="getListByEmail" resultType="kr.liw.domain.ReplyVO">
+  		select RNO, PBNO, REPLY, REPLYER, REPLYDATE from ICU_PB_REPLY where REPLYER = #{email} order by REPLYDATE desc
+  	</select>
+  </mapper>

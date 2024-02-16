@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="kr.liw.mapper.PhotoBoardMapper">
+  	
+	<sql id="criteria">
+		<trim prefix="(" suffix=") AND " prefixOverrides="OR">
+			<foreach item ='type' collection="typeArr">
+				<trim prefix="OR">
+					<choose>
+						<when test="type == 'T'.toString()">
+							title like '%'||#{keyword}||'%'
+						</when>
+						
+						<when test="type == 'C'.toString()">
+							content like '%'||#{keyword}||'%'
+						</when>
+						
+						<when test="type == 'W'.toString()">
+							email like '%'||#{keyword}||'%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+	 
+	 
+	<!-- <select id="getList" resultType="kr.liw.domain.PhotoBoardVO">
+		select * from ICU_PHOTOBOARD where PBNO > 0 order by PBNO
+	</select> -->
+	<select id="getList" resultType="kr.liw.domain.PhotoBoardVO">
+  		<![CDATA[
+  			select PBNO, EMAIL, NICKNAME, CATEGORY, TITLE, CONTENT, CREATEDATE, VIEWS, REPLYCNT, UPDATEDATE, IMAGE_PATH, IMAGE_UUID, IMAGE_NAME
+			from 
+			(
+				select /*+INDEX_DESC(ICU_PHOTOBOARD ICU_PHOTOBOARD_PK)*/
+					rownum rn, PBNO, EMAIL, NICKNAME, CATEGORY, TITLE, CONTENT, CREATEDATE, VIEWS, REPLYCNT, UPDATEDATE, IMAGE_PATH, IMAGE_UUID, IMAGE_NAME
+				from ICU_PHOTOBOARD
+				where
+		]]>
+			
+		<include refid="criteria"/>	
+				
+		<![CDATA[ 
+			rownum <= #{pageNum} * #{amount}
+  			)
+  			where rn > (#{pageNum} -1) *#{amount}
+  			
+  		]]>
+  	</select>
+  	
+  	<select id="getTotalCount" resultType="int">
+  		select count(*) from ICU_PHOTOBOARD where 
+  		<include refid="criteria"/>
+  		PBNO > 0 and CATEGORY != 'notice'
+  	</select>
+	
+	<select id="read" resultType="kr.liw.domain.PhotoBoardVO">
+		select * from ICU_PHOTOBOARD where PBNO = #{PBNO}
+	</select>
+	
+	<insert id="insert" useGeneratedKeys="true" keyColumn="pbno" keyProperty="pbno">
+		insert into ICU_PHOTOBOARD
+		(PBNO, EMAIL, NICKNAME, CATEGORY, TITLE, CONTENT, IMAGE_PATH, IMAGE_UUID, IMAGE_NAME)
+		VALUES(ICU_PHOTOBOARD_SEQ.NEXTVAL, #{email}, #{nickname}, #{category}, #{title}, #{content}, #{image_path, jdbcType=VARCHAR}, #{image_uuid, jdbcType=VARCHAR}, #{image_name, jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="update">
+		update ICU_PHOTOBOARD
+		set CATEGORY = #{category},
+		TITLE = #{title},
+		CONTENT = #{content},
+		IMAGE_PATH = #{image_path, jdbcType=VARCHAR},
+		IMAGE_UUID = #{image_uuid, jdbcType=VARCHAR},
+		IMAGE_name = #{image_name, jdbcType=VARCHAR}
+		where PBNO = #{pbno}
+	</update>
+	
+	<delete id="delete">
+		delete from ICU_PHOTOBOARD where PBNO = #{pbno}
+	</delete>
+	
+	<update id="updateReplyCnt">
+  		update ICU_PHOTOBOARD set REPLYCNT = REPLYCNT + #{amount} where PBNO = #{pbno}
+  	</update>
+  	
+  	<select id="getListByEmail" resultType="kr.liw.domain.PhotoBoardVO">
+  		select PBNO, EMAIL, CATEGORY, TITLE, CREATEDATE,REPLYCNT from ICU_PHOTOBOARD where EMAIL = #{email} order by CREATEDATE desc
+  	</select>
+  	
+  	<update id="updateViews">
+  		update ICU_PHOTOBOARD set VIEWS = VIEWS + 1 where PBNO = #{pbno}
+  	</update>
+</mapper> 
